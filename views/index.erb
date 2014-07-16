@@ -1,0 +1,15 @@
+<h2>By Repo</h2>
+<% repo_names.each do |repo| %>
+  <a href="/repo/<%= repo %>"><%= repo.capitalize %></a>
+<% end %>
+<h2>By Email</h2>
+<input id="email" type="email" placeholder="Email"/><button id="email_search">Look up</button>
+
+<script>
+
+document.getElementById('email_search').onclick = function(e) {
+  window.location.pathname = '/email/'+document.getElementById('email').value;
+}
+
+</script>
+
