@@ -24,6 +24,28 @@ helpers do
       obj['filename']
     end
   end
+  def all
+    todos = []
+    $redis.keys("blamer:repo:*").each do |repo|
+      $redis.zrange(repo, 0, -1).each do |obj|
+        todos.push(JSON.parse(obj))
+      end
+    end
+    todos
+  end
+  def top_offenders
+    off = all.group_by do |obj|
+      obj['committer']
+    end.map do |a, b|
+      { label: a, value: b.length}
+    end.sort do |a, b|
+      a[:value] <=> b[:value]
+    end
+    off.each_with_index do |obj, i|
+      obj[:color] = "hsl(#{i * 360.0 / off.length},100%,50%)"
+    end
+    off
+  end
   def cache time: 3600, &block
       if "development" == ENV["RACK_ENV"]
           return yield
@@ -65,7 +87,7 @@ get '/' do
     $redis.keys("blamer:repo:*").map do |repo|
       count += $redis.zcard(repo)
     end
-    erb :index, locals: {title: "When were you actually going to do that?", todos: count}
+    erb :index, locals: {title: "When were you actually going to do that?", todos: count, offenders: top_offenders}
   end
 end
 

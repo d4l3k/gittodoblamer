@@ -4,12 +4,14 @@
 <% end %>
 <h2>By Email</h2>
 <input id="email" type="email" placeholder="Email"/><button id="email_search">Look up</button>
-
+<h2>Top Offenders</h2>
+<canvas id="offenders" width="400" height="400"></canvas>
 <script>
-
-document.getElementById('email_search').onclick = function(e) {
-  window.location.pathname = '/email/'+document.getElementById('email').value;
-}
-
+  document.getElementById('email_search').onclick = function(e) {
+    window.location.pathname = '/email/'+document.getElementById('email').value;
+  }
+  var ctx = document.getElementById("offenders").getContext("2d");
+  var chart = new Chart(ctx).Doughnut(<%= JSON.dump(offenders) %>,
+    {});
 </script>
 
