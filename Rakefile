@@ -88,3 +88,11 @@ task 'update' do
     puts "----"
   end
 end
+
+task 'cache:bust' do
+  require 'redis'
+  $redis = Redis.new
+  $redis.keys("blamer:url:*").each do |url|
+    $redis.del url
+  end
+end

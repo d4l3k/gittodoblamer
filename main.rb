@@ -55,7 +55,7 @@ helpers do
       if "development" == ENV["RACK_ENV"]
           return yield
       end
-      tag = "blamer:#{request.path}"
+      tag = "blamer:url:#{request.path}"
       page = $redis.get(tag)
       if page
           etag Digest::SHA1.hexdigest(page)
