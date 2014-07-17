@@ -1,3 +1,10 @@
+task 'pry' do
+  require 'bundler'
+  Bundler.require
+  require './main'
+  binding.pry
+end
+
 task 'analyze' do
   require 'redis'
   require 'json'
@@ -60,3 +67,24 @@ task 'analyze' do
   end
 end
 
+task 'update' do
+  require 'json'
+  require 'pry'
+  repos = []
+  print "Enter password: "
+  password = STDIN.noecho(&:gets)[0...-1]
+  types = %w{private public}
+  types.each do |type|
+    resp = JSON.parse(`curl -u "d4l3k:#{password}" https://api.github.com/orgs/socrata/repos\?type\=#{type}`)
+    repos += resp
+  end
+  repos.each_with_index do |repo, i|
+    puts "Repo: #{repo['full_name']} (#{i+1}/#{repos.length})"
+    if !File.exists?("../socrata/#{repo['name']}")
+      system("cd ../socrata/; git clone git@github.com:#{repo['full_name']}.git")
+    else
+      system("cd ../socrata/#{repo['name']}; git checkout master; git pull")
+    end
+    puts "----"
+  end
+end

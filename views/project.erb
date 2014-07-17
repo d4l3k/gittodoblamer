@@ -23,6 +23,7 @@ groups.each do |k, todos| %>
           <td><%= todo['committer'] %> <span class="details"><%= h todo['committer-mail'] %></span></td>
           <td><span class="details"><%= h todo['filename'] %>:</span><%= todo['line'] %></td>
           <td><%= CodeRay.scan(todo['code'], languages[extension] || extension ).div %></td>
+          <td><%= time_ago_in_words(todo['committer-time']) %></td>
         </tr>
       <% end %>
     </tbody>

@@ -1,17 +1,74 @@
-<h2>By Repo</h2>
-<% repo_names.each do |repo| %>
-  <a href="/repo/<%= repo %>"><%= repo.capitalize %></a>
-<% end %>
-<h2>By Email</h2>
-<input id="email" type="email" placeholder="Email"/><button id="email_search">Look up</button>
-<h2>Top Offenders</h2>
-<canvas id="offenders" width="400" height="400"></canvas>
+<div class="row">
+  <div class="col-md-6">
+    <h2 class="page-header">By Repo</h2>
+    <canvas id="repos" width="300" height="300"></canvas>
+  </div>
+  <div class="col-md-6">
+    <h2 class="page-header">Top Offenders</h2>
+    <canvas id="offenders" width="300" height="300"></canvas>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <h2 class="page-header">By Email</h2>
+    <input id="email" type="email" class="form-control" placeholder="Email"/> <button class="btn btn-primary" type="submit" id="email_search">Lookup</button>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h2 class="page-header">Wall of Shame - Top 100</h2>
+    <%= erb :project, locals: {groups: shame} %>
+    <a class="btn btn-primary col-md-12" href="/age">More</a>
+  </div>
+</div>
+
 <script>
-  document.getElementById('email_search').onclick = function(e) {
-    window.location.pathname = '/email/'+document.getElementById('email').value;
+  var handler = function(e) {
+    var email = document.getElementById('email').value;
+    if (email.length > 0)
+      window.location.pathname = '/email/'+email;
   }
-  var ctx = document.getElementById("offenders").getContext("2d");
-  var chart = new Chart(ctx).Doughnut(<%= JSON.dump(offenders) %>,
-    {});
+  $('#email_search').click(handler);
+  $('#email').on('keydown', function(e) {
+    if(e.keyCode == 13) handler();
+  });
+  window.onload = function(){
+    (function() {
+      var canvas = document.getElementById("offenders");
+      var ctx = canvas.getContext("2d");
+      var users = <%= JSON.dump(offenders) %>;
+      var chart = new Chart(ctx).Doughnut(users, {});
+      var legend = $(chart.generateLegend());
+      $(canvas).parent().append(legend);
+      legend.children().each(function(i,li){legend.prepend(li)})
+      legend.children().slice(30).remove()
+      canvas.onclick = function(event) {
+        var name = chart.getSegmentsAtEvent(event)[0].label;
+        var email = '';
+        _.each(users, function(user) {
+          if (user.label == name) email = user.email.slice(1,-1);
+        });
+        window.location.pathname = '/email/' + email;
+      };
+    })();
+
+    (function() {
+      var canvas = document.getElementById("repos");
+      var ctx = canvas.getContext("2d");
+      var users = <%= JSON.dump(repo_names) %>;
+      var chart = new Chart(ctx).Doughnut(users, {});
+      var legend = $(chart.generateLegend());
+      $(canvas).parent().append(legend);
+      legend.children().each(function(i,li){legend.prepend(li)})
+      canvas.onclick = function(event) {
+      var name = chart.getSegmentsAtEvent(event)[0].label;
+      window.location.pathname = '/repo/' + name.toLowerCase();
+      };
+    })();
+    $(window).on('resize', function() {
+      var width = $('canvas').parent().width();
+      $('canvas').css({ 'max-width': width, 'max-height': width });
+    }).trigger('resize');
+  }
 </script>
 

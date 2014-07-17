@@ -1,3 +1,5 @@
+source 'https://rubygems.org'
+
 gem 'sinatra'
 gem 'erubis'
 gem 'redis'
@@ -7,3 +9,8 @@ gem 'coderay'
 gem 'compass'
 gem 'sass'
 gem 'unicorn'
+gem 'actionview', require: ['action_view', 'action_view/helpers']
+gem 'activesupport', require: 'active_support/core_ext'
+gem 'git_time_extractor'
+gem 'rack-test'
+gem 'rspec'

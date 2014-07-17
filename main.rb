@@ -5,6 +5,8 @@ require 'json'
 
 $redis = Redis.new
 
+I18n.enforce_available_locales = true
+
 configure do
   Compass.configuration do |config|
     config.project_path = File.dirname(__FILE__)
@@ -17,6 +19,7 @@ configure do
 end
 
 helpers do
+  include ActionView::Helpers::DateHelper
   def group todos
     todos.sort do |a, b|
       a['line'] <=> b['line']
@@ -28,16 +31,18 @@ helpers do
     todos = []
     $redis.keys("blamer:repo:*").each do |repo|
       $redis.zrange(repo, 0, -1).each do |obj|
-        todos.push(JSON.parse(obj))
+        json = JSON.parse(obj)
+        json['committer-time'] = Time.at(json['committer-time'].to_i)
+        todos.push(json)
       end
     end
     todos
   end
   def top_offenders
     off = all.group_by do |obj|
-      obj['committer']
+      [obj['committer'], obj['committer-mail']]
     end.map do |a, b|
-      { label: a, value: b.length}
+      { label: a[0], email: a[1], value: b.length}
     end.sort do |a, b|
       a[:value] <=> b[:value]
     end
@@ -66,9 +71,20 @@ helpers do
       page
   end
   def repo_names
-    $redis.keys("blamer:repo:*").map do |repo|
-      repo.split(':').last
+    names = $redis.keys("blamer:repo:*").map do |repo|
+      { label: repo.split(':').last.capitalize, value: $redis.zcard(repo)}
+    end.sort do |a, b|
+      a[:value] <=> b[:value]
     end
+    names.each_with_index do |obj, i|
+      obj[:color] = "hsl(#{i * 360.0 / names.length},100%,50%)"
+    end
+    names
+  end
+  def shame count: 99
+    {"" => all.sort do |a, b|
+      a['committer-time'] <=> b['committer-time']
+    end[0..count]}
   end
   def h(text)
     Rack::Utils.escape_html(text)
@@ -91,11 +107,20 @@ get '/' do
   end
 end
 
+get '/age' do
+  cache do
+    sh = shame count: -1
+    erb :project, locals: {title: "Wall of Shame", todos: sh[''].length, groups: sh}
+  end
+end
+
 get '/repo/:project' do
   cache do
     project = params[:project].downcase
     todos = $redis.zrange("blamer:repo:#{project}", 0, -1).map do |obj|
-      JSON.parse(obj)
+      json = JSON.parse(obj)
+      json['committer-time'] = Time.at(json['committer-time'].to_i)
+      json
     end
     count = todos.length
     todos = group todos
@@ -106,13 +131,7 @@ get '/email/:email' do
   cache do
     email = params[:email]
     name = ""
-    todos = []
-    $redis.keys("blamer:repo:*").each do |repo|
-      todos += $redis.zrange(repo, 0, -1).map do |obj|
-        JSON.parse(obj)
-      end
-    end
-    todos = todos.select do |obj|
+    todos = all.select do |obj|
       obj['committer-mail'] == "<#{email}>"
     end
     count = todos.length

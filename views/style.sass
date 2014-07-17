@@ -1,12 +1,5 @@
 $font: 'Open Sans', sans-serif
 
-*
-  margin: 0
-  padding: 0
-  -webkit-box-sizing: border-box
-  -moz-box-sizing: border-box
-  box-sizing: border-box
-
 body
   font-family: $font
   padding-top: 50px
@@ -17,6 +10,28 @@ body, td
 .pull-right
   float: right
 
+canvas
+  margin: 0 auto
+  display: block
+  cursor: pointer
+
+.doughnut-legend
+  width: 100%
+  text-align: center
+  margin-top: 20px
+  li
+    display: inline-block
+    margin: 5px 10px
+    span
+      display: inline-block
+      height: 1rem
+      width: 1rem
+      margin-right: 5px
+
+.form-control
+  display: inline-block
+  width: initial
+
 nav
   border-top: 4px solid red
   position: fixed
@@ -24,11 +39,13 @@ nav
   height: 50px
   top: 0
   line-height: 46px
+  z-index: 10000
   border-bottom: 1px solid #ccc
   font-family: $font
-  font-size: 12pt
+  font-size: 11pt
   background-color: rgba(255,255,255,0.9)
-  padding: 0 30px
+  overflow-x: auto
+  white-space: nowrap
   a
     color: rgba(0,0,0,0.5)
     text-decoration: none
@@ -45,27 +62,32 @@ h1, h2, h3, h4
   font-family: $font
   font-weight: lighter
 
-.container
-  padding: 15px
-  margin: 15px
-  background-color: white
-
 table
-  margin: 10px
-  margin-bottom: 30px
+  margin-bottom: 10px
   border-collapse: collapse
   background-color: white
   border: 1px solid black
+  min-width: 100%
 
   td
     white-space: nowrap
     padding: 3px 6px
+    background-color: white
 
     .details
       display: none
 
-    &:hover .details
-      display: initial
+
+    &:hover
+      &:nth-child(1), &:nth-child(2)
+        position: absolute
+      &:nth-child(1)
+        border: 1px solid black
+        margin-top: -1px
+        margin-bottom: -1px
+        border-left: 0
+      .details
+        display: initial
 
     &:nth-child(2)
       background-color: black
@@ -73,4 +95,13 @@ table
       text-align: right
 
     &:nth-child(3)
-      background-color: white
+      width: 100%
+
+    &:nth-child(4)
+      text-align: right
+
+    pre
+      padding: 0
+      border: 0
+      margin: 0
+      background-color: transparent
