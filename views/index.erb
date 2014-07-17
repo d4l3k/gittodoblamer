@@ -41,7 +41,7 @@
       var legend = $(chart.generateLegend());
       $(canvas).parent().append(legend);
       legend.children().each(function(i,li){legend.prepend(li)})
-      legend.children().slice(30).remove()
+      legend.children().slice(26).remove()
       canvas.onclick = function(event) {
         var name = chart.getSegmentsAtEvent(event)[0].label;
         var email = '';

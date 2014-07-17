@@ -24,7 +24,7 @@ helpers do
     todos.sort do |a, b|
       a['line'] <=> b['line']
     end.group_by do |obj|
-      obj['filename']
+      "#{obj['repo']}: #{obj['filename']}"
     end
   end
   def all

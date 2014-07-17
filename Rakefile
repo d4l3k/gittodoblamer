@@ -11,7 +11,7 @@ task 'analyze' do
   require 'pry'
 
   $redis = Redis.new
-  ignore = %w{node_modules bower_components packages bower plugins target}
+  ignore = %w{node_modules bower_components packages bower plugins target vendor}
   messages = []
   dirs = Dir.glob("../socrata/*")
   dirs.each do |dir|
@@ -50,12 +50,14 @@ task 'analyze' do
                 v = line[space + 1..-1]
                 obj[k] = v
               end
+            elsif line == "boundary"
             else
               puts "WEIRD: #{file} #{line}"
             end
           else
             if line.downcase.include?('todo')
               obj['code'] = line[1..-1]
+              obj['repo'] = name
               lines.push([time, JSON.dump(obj)])
             end
             obj = {}

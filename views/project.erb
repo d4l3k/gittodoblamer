@@ -13,7 +13,7 @@ languages = {
   conf: :conf
 }
 groups.each do |k, todos| %>
-  <h3><%= k %></h3>
+  <h4><%= k %></h4>
   <table>
     <tbody>
       <% todos.each do |todo|
@@ -21,7 +21,7 @@ groups.each do |k, todos| %>
       %>
         <tr>
           <td><%= todo['committer'] %> <span class="details"><%= h todo['committer-mail'] %></span></td>
-          <td><span class="details"><%= h todo['filename'] %>:</span><%= todo['line'] %></td>
+          <td><span class="details"><%= h(todo['repo'] + ': ' + todo['filename']) %>:</span><%= todo['line'] %></td>
           <td><%= CodeRay.scan(todo['code'], languages[extension] || extension ).div %></td>
           <td><%= time_ago_in_words(todo['committer-time']) %></td>
         </tr>
